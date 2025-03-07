@@ -3,9 +3,23 @@ const CHANNEL_ID = 'UCTptd_keVutnS2bXPRb9vOQ';  // Remplace par ton ID de chaîn
 
 // Fonction pour récupérer toutes les vidéos de la chaîne
 async function fetchVideos() {
-    const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&key=${API_KEY}`);
-    const data = await response.json();
-    displayVideos(data.items);
+    let allVideos = [];
+    let nextPageToken = '';  // Initialisation de la pagination
+
+    // Tant qu'il y a une page suivante, on continue à récupérer les vidéos
+    while (nextPageToken !== undefined) {
+        const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&maxResults=50&key=${API_KEY}&pageToken=${nextPageToken}`);
+        const data = await response.json();
+        
+        // Ajouter les vidéos de la page courante à la liste complète
+        allVideos = allVideos.concat(data.items);
+        
+        // Si la réponse contient une page suivante, on prépare pour la récupérer
+        nextPageToken = data.nextPageToken;
+    }
+
+    // Une fois qu'on a récupéré toutes les vidéos, on les affiche
+    displayVideos(allVideos);
 }
 
 // Fonction pour récupérer les commentaires d'une vidéo, avec gestion de la pagination
